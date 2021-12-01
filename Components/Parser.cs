@@ -94,7 +94,12 @@ namespace Components
         /// 
         /// </summary>
         /// <returns></returns>
-        private Expression Expression() => _currentToken.Type == TokenType.If ? IfExpression() : ValueExpression();
+        private Expression Expression() => _currentToken.Type switch
+        {
+            TokenType.If            => IfExpression(),
+            TokenType.LCurlyBracket => BlockExpression(),
+            _ => ValueExpression()
+        };
 
 
         /// <summary>
@@ -115,6 +120,26 @@ namespace Components
             falseBranch = Expression();
 
             return new IfExpression(condition, trueBranch, falseBranch);
+        }
+
+
+        /// <summary>
+        /// Parses block expressions
+        /// </summary>
+        /// <returns>Block of expressions</returns>
+        private Expression BlockExpression()
+        {
+            List<Expression> blockExpressions = new();
+
+            Match(TokenType.LCurlyBracket);
+            while (_currentToken.Type != TokenType.RCurlyBracket)
+            {
+                blockExpressions.Add(Expression());
+                Match(TokenType.Semicolon);
+            }
+            Match(TokenType.RCurlyBracket);
+
+            return new BlockExpression(blockExpressions.ToArray());
         }
 
 
@@ -223,6 +248,11 @@ namespace Components
                     Match(TokenType.RBracket);
 
                     return new CallExpression(name, argsValues.ToArray());
+                }
+                else if (_currentToken.Type == TokenType.Colon)
+                {
+                    Match(TokenType.Colon);
+                    return new InitExpression(name, Expression());
                 }
                 return new Identifier(name);
             }
