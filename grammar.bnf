@@ -1,0 +1,54 @@
+% program example
+
+	factorialTailRecursion(n accumulator) -> 
+		if n = 0 then accumulator 
+		else factorialTailRecursion(n - 1 accumulator * n);
+
+	factorialCalculate(n) -> if n > -1 then factorialTailRecursion(n 1) else -1;
+
+	someFunction() -> {
+		if n > -1 then {
+			a: n + 2;
+			if a = 9 then a else 0;
+		}
+		else {
+			
+		};
+	};
+
+	H(n) -> {
+		g: n + 78 * {
+			67 * 8912 + 123;
+		};
+		if g = 2 then g else g - 1;
+	};
+
+	inputHandler() -> input();
+
+	outputHandler(out) -> output(out);
+
+	main() -> outputHandler(factorialCalculate(inputHandler()));
+	
+%
+
+<program>				::= <functions> 
+<functions>				::= <function> <functions> | ""
+<function>				::= <identifier> '(' <args> ')' "->" <expression> ';'
+<args>					::= <identifier> <args> | ""
+<expression>			::= "if" <value-expression> "then" <value-expression> "else" <value-expression> | <value-expression> | <block> | <init-expression>
+
+
+% New syntax % 
+<block>					::= '{' <block-expressions> '}'
+<block-expressions>		::= <expression> ';' <block-expressions> | ""
+<init-expression>		::= <identifier> ':' <expression>
+% New syntax % 
+
+
+<value-expression>		::= <value-expression> <rel-op> <add-term> | <add-term>
+<add-term>				::= <add-term> '+' <mult-term> | <add-term> '-' <mult-term> | <mult-term>
+<mult-term>				::= <mult-term> '*' <unary-term> |  <mult-term> '/' <unary-term> | <mult-term> '%' <unary-term> | <unary-term>
+<unary-term>			::= '+' <unary-term> | '-' <unary-term> | <factor>
+<factor>				::= '(' <add-term> ')' | <number> | <identifier> | <function-call>
+<function-call>			::= <identifier> '(' <arg-values> ')'
+<arg-values>			::= <value-expression> <arg-values> | ""
