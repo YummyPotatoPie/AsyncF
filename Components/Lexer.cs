@@ -15,7 +15,7 @@ namespace Components
         /// <summary>
         /// 
         /// </summary>
-        private readonly string _specialSymbols = "();";
+        private readonly string _specialSymbols = "();:{}";
 
         /// <summary>
         /// 
@@ -148,6 +148,15 @@ namespace Components
                     break;
                 case ';':
                     token = new(TokenType.Semicolon, _line);
+                    break;
+                case ':':
+                    token = new(TokenType.Colon, _line);
+                    break;
+                case '{':
+                    token = new(TokenType.LCurlyBracket, _line);
+                    break;
+                case '}':
+                    token = new(TokenType.RCurlyBracket, _line);
                     break;
             }
             _position++;
