@@ -61,6 +61,8 @@ namespace Components
             ExpressionType.Call       => await EvaluateCall((CallExpression)expression),
             ExpressionType.Constant   => ((Constant)expression).Value,
             ExpressionType.Identifier => EvaluateIdentifier((Identifier)expression),
+            ExpressionType.Init       => await EvaluateInit((InitExpression)expression),
+            ExpressionType.Block      => await EvaluateBlock((BlockExpression)expression),
             _ => 0
         };
 
@@ -117,6 +119,41 @@ namespace Components
 
 
         /// <summary>
+        /// Evaluate initialization expression
+        /// </summary>
+        /// <param name="expression">Initialization expression</param>
+        /// <returns>Named constant value</returns>
+        private static async Task<long> EvaluateInit(InitExpression expression)
+        {
+            if (LocalScope.GetConstant(expression.NamedConstant.Name) != null) 
+                throw new EvaluateException($"Named constant '{expression.NamedConstant.Name}' already exist at local scope and cannot change value", expression.NamedConstant.Line);
+
+            LocalScope.PutConstant(expression.NamedConstant.Name, await Evaluate(expression.ConstantExpression));
+            return (long)LocalScope.GetConstant(expression.NamedConstant.Name);
+        }
+
+
+        /// <summary>
+        /// Evaluate block expression
+        /// </summary>
+        /// <param name="expression">Block expression</param>
+        /// <remarks>If block doesnt have any expression returns 0</remarks>
+        /// <returns>Last block expression evaluate result</returns>
+        private static async Task<long> EvaluateBlock(BlockExpression expression)
+        {
+            if (expression.BlockExpressions.Length == 0) return 0;
+
+            LocalScope = new Environment(LocalScope);
+            for (int i = 0; i < expression.BlockExpressions.Length - 1; i++) await Evaluate(expression.BlockExpressions[i]);
+            long blockResult = await Evaluate(expression.BlockExpressions[^1]);
+
+            LocalScope = LocalScope.Previous;
+            return blockResult;
+        }
+
+
+
+        /// <summary>
         /// Evaluates function call expressions
         /// </summary>
         /// <param name="expression">Function call expression</param>
@@ -136,7 +173,7 @@ namespace Components
                     if (long.TryParse(Console.ReadLine(), out long inputValue)) return inputValue;
                     return 0;
                 }
-                else throw new EvaluateException("Function does not exist", expression.CallFunctionName.Line);
+                else throw new EvaluateException($"Function '{expression.CallFunctionName.Name}' does not exist", expression.CallFunctionName.Line);
             }
 
             LocalScope = new Environment(LocalScope);
