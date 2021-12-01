@@ -48,16 +48,10 @@ namespace Interpreter
                 }
             }
 
-            try
-            {
-                if (globalFunctionsTable.GetFunction("main") != null) Run(globalFunctionsTable);
-                else Console.WriteLine("Program doesnt contain 'main' functions, execution stopped.");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"{e.Message}\nExecution stopped.");
-            }
+            if (globalFunctionsTable.GetFunction("main") != null) Run(globalFunctionsTable);
+            else Console.WriteLine("Program doesnt contain 'main' functions, execution stopped.");
         }
+
 
         /// <summary>
         /// Execute program
@@ -65,8 +59,15 @@ namespace Interpreter
         /// <param name="prog">Program AST</param>
         public static async void Run(Program prog)
         {
-            Evaluator.SetEvaluateFunctionsTable(prog.GetAllFunctions());
-            await Evaluator.Evaluate(prog.GetFunction("main").Body);
+            try
+            {
+                Evaluator.SetEvaluateFunctionsTable(prog.GetAllFunctions());
+                await Evaluator.Evaluate(prog.GetFunction("main").Body);
+            }
+            catch (AsyncFException e)
+            {
+                Console.WriteLine($"{e.Message}\nExecution stopped.");
+            }
         }
 
     }
